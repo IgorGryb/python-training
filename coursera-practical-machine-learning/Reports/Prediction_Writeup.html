@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Predicting exercise quality</title><style>body{font:16px/1.6 system-ui,sans-serif;max-width:960px;margin:45px auto;padding:0 22px;color:#203747}h1,h2{line-height:1.25}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #cbd5db;padding:7px;text-align:left}th{background:#e9f0f4}code{background:#eef1f3;padding:2px}a{overflow-wrap:anywhere}</style><body><h1>Predicting exercise quality from wearable sensors</h1>
+<p>Practical Machine Learning — Prediction Assignment Writeup<br />
+Prepared 15 October 2026. AI-assisted analysis for learner review.</p>
+<h2>Objective and data</h2>
+<p>Predict the five-category <code>classe</code> outcome from belt, arm, forearm and dumbbell measurements. The supplied training file contains 19,622 labeled observations from six participants; the separate assessment file has 20 observations without labels. Class counts A–E are 5,580, 3,797, 3,422, 3,216 and 3,607. This is a classification problem, not a causal estimate of training effectiveness.</p>
+<h2>Cleaning and leakage controls</h2>
+<p>Empty strings, <code>NA</code> and <code>#DIV/0!</code> are missing values. Exclude row identifiers, participant names, raw/formatted timestamps, <code>new_window</code> and <code>num_window</code> from predictors. Identifiers and timing fields could encode acquisition order rather than exercise mechanics. Exclude variables with at least 5% missingness and nonnumeric or constant fields. This leaves 52 numeric sensor measurements, complete in both files, so no imputation or scaling is needed. Feature availability is assessed from the labeled training file; the assessment file is used only for schema checks and final predictions. Its outcomes are never observed. Tree methods do not require standardized units.</p>
+<p>Measurements within one recording window are related. Group identifiers combine participant and <code>num_window</code>; all rows from one group remain in a single split. Using seed 20261015, reserve 25% of groups using GroupShuffleSplit: 14,644 development rows in 643 groups and 4,978 validation rows in 215 disjoint groups. Splits are not stratified; the saved row-level split file makes the exact split auditable.</p>
+<h2>Model building and cross-validation</h2>
+<p>Compare an unconstrained CART decision tree with a 150-tree random forest, using square-root feature subsampling and otherwise library defaults. The forest averages diverse trees, captures nonlinear interactions and usually reduces the instability of a single tree. Three-fold GroupKFold cross-validation operates only inside the development partition and retains entire windows in each fold. Select by mean accuracy; do not select using the held-out validation results. There is no broad hyperparameter search or iterative tuning against the holdout.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Fold 1 accuracy</th>
+<th>Fold 2 accuracy</th>
+<th>Fold 3 accuracy</th>
+<th>Mean accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decision tree</td>
+<td>78.86%</td>
+<td>80.21%</td>
+<td>84.88%</td>
+<td>81.32%</td>
+</tr>
+<tr>
+<td>Random forest</td>
+<td>89.94%</td>
+<td>90.80%</td>
+<td>93.73%</td>
+<td>91.49%</td>
+</tr>
+</tbody>
+</table>
+<p>The random forest wins with mean cross-validation accuracy 91.49%. Fold variation is relevant: it reflects differences in held-out windows and available training size, not a confidence interval for deployment accuracy.</p>
+<h2>Held-out performance and expected error</h2>
+<p>Fit the selected 150-tree forest on development rows and evaluate once on the reserved windows. Accuracy is <strong>95.70%</strong>, with <strong>214 errors out of 4,978</strong>. The estimated out-of-sample misclassification rate for comparable new windows from this collection is therefore <strong>4.30%</strong>. Three-fold development CV gives a more conservative error of 8.51%; its folds train on fewer observations and contain different windows. These estimates should be reported together rather than choosing the most favorable number.</p>
+<p>Confusion matrix: rows are actual classes; columns are predictions.</p>
+<table>
+<thead>
+<tr>
+<th>Actual / predicted</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1534</td>
+<td>11</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>B</td>
+<td>24</td>
+<td>714</td>
+<td>33</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>C</td>
+<td>0</td>
+<td>3</td>
+<td>932</td>
+<td>64</td>
+<td>0</td>
+</tr>
+<tr>
+<td>D</td>
+<td>9</td>
+<td>0</td>
+<td>25</td>
+<td>802</td>
+<td>2</td>
+</tr>
+<tr>
+<td>E</td>
+<td>1</td>
+<td>3</td>
+<td>31</td>
+<td>6</td>
+<td>782</td>
+</tr>
+</tbody>
+</table>
+<p>The largest off-diagonal count is 64 true C observations classified as D. Overall accuracy hides such class-specific differences; the repository includes a full precision/recall report.</p>
+<h2>Limits of generalization</h2>
+<p>This validation prevents exact recording-window overlap but includes the same participants across partitions. It is not leave-one-person-out testing, and adjacent windows may remain correlated. Only six people were measured, so accuracy on new people, new sessions, other devices or other exercises could be materially lower. A row-independent binomial interval would understate uncertainty when rows are correlated, so no such interval is used as a deployment guarantee. Further evaluation should hold out participants or independent sessions. Neither the 20 unlabeled assessment cases nor the previously completed quiz provides an independently measured accuracy for this fitted model.</p>
+<h2>Final model and 20 assessment cases</h2>
+<p>After evaluation, refit the same selected forest family on all 19,622 labeled rows, increasing the tree count to 300 for the final predictions and retaining square-root feature subsampling and the seed. No assessment labels or scores influence fitting. The saved <code>Test_predictions.csv</code> contains one prediction for each <code>problem_id</code>; it does not overwrite the already passed Coursera quiz. The validation estimate belongs to the 150-tree development fit; it is an approximation for, not a fresh evaluation of, the final refit.</p>
+<h2>Reproducibility</h2>
+<p>The submitted Markdown source (<code>Prediction_Writeup.md</code>) and its compiled HTML (<code>Prediction_Writeup.html</code>) accompany <code>analyze.py</code>, package versions, split assignments, metrics and the confusion matrix. The analysis was actually executed in Python 3.12.14 with scikit-learn 1.9.1, pandas 2.2.3 and NumPy 2.5.4. No unexecuted R output is claimed. The submission form accepts a <code>.md</code> source plus compiled HTML. Download the HTML to read it locally if GitHub displays its source.</p>
+<p>To reproduce, install <code>requirements.txt</code>, place the two original CSVs in <code>Data</code>, and run <code>python Code/analyze.py</code>. The script saves exact numerical outputs in <code>Reports</code>. Random seeds and all partition/model choices are explicit. Parallel floating-point/library differences may cause minor version-dependent variation.</p>
+<h2>Sources and attribution</h2>
+<p>Dataset: Weight Lifting Exercises, Human Activity Recognition project, PUC-Rio: http://groupware.les.inf.puc-rio.br/har (archived site linked in the assignment). Original project description: Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. (2013), “Qualitative Activity Recognition of Weight Lifting Exercises,” AH '13, pp. 116–123, doi:10.1145/2459236.2459256.</p>
+<p>Course-provided files: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv and https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv . Assignment: Johns Hopkins University, Practical Machine Learning, Prediction Assignment Writeup. Accessed 15 October 2026.</p></body></html>
