@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fiji earthquake sample explorer</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Fiji earthquake sample explorer">
+  <meta name="author" content="Igor Grybek — AI-assisted draft">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="data:text/css, /*%20Tomorrow%20Theme%20*/%0A%09/*%20http://jmblog.github.com/color-themes-for-google-code-highlightjs%20*/%0A%09/*%20Original%20theme%20-%20https://github.com/chriskempson/tomorrow-theme%20*/%0A%09/*%20http://jmblog.github.com/color-themes-for-google-code-highlightjs%20*/%0A%09.tomorrow-comment,%20pre%20.comment,%20pre%20.title%20%7B%0A%09%09color:%20#8e908c;%0A%09%7D%0A%0A.tomorrow-red,%20pre%20.variable,%20pre%20.attribute,%20pre%20.tag,%20pre%20.regexp,%20pre%20.ruby%20.constant,%20pre%20.xml%20.tag%20.title,%20pre%20.xml%20.pi,%20pre%20.xml%20.doctype,%20pre%20.html%20.doctype,%20pre%20.css%20.id,%20pre%20.css%20.class,%20pre%20.css%20.pseudo%20%7B%0A%09color:%20#c82829;%0A%7D%0A%0A.tomorrow-orange,%20pre%20.number,%20pre%20.preprocessor,%20pre%20.built_in,%20pre%20.literal,%20pre%20.params,%20pre%20.constant%20%7B%0A%09color:%20#f5871f;%0A%7D%0A%0A.tomorrow-yellow,%20pre%20.class,%20pre%20.ruby%20.class%20.title,%20pre%20.css%20.rules%20.attribute%20%7B%0A%09color:%20#eab700;%0A%7D%0A%0A.tomorrow-green,%20pre%20.string,%20pre%20.value,%20pre%20.inheritance,%20pre%20.header,%20pre%20.ruby%20.symbol,%20pre%20.xml%20.cdata%20%7B%0A%09color:%20#718c00;%0A%7D%0A%0A.tomorrow-aqua,%20pre%20.css%20.hexcolor%20%7B%0A%09color:%20#3e999f;%0A%7D%0A%0A.tomorrow-blue,%20pre%20.function,%20pre%20.python%20.decorator,%20pre%20.python%20.title,%20pre%20.ruby%20.function%20.title,%20pre%20.ruby%20.title%20.keyword,%20pre%20.perl%20.sub,%20pre%20.javascript%20.title,%20pre%20.coffeescript%20.title%20%7B%0A%09color:%20#4271ae;%0A%7D%0A%0A.tomorrow-purple,%20pre%20.keyword,%20pre%20.javascript%20.function%20%7B%0A%09color:%20#8959a8;%0A%7D%0A%0Apre%20code%20%7B%0A%09display:%20block;%0A%09background:%20white;%0A%09color:%20#4d4d4c;%0A%09%09font-family:%20Menlo,%20Monaco,%20Consolas,%20monospace;%0A%09line-height:%201.5;%0A%09border:%201px%20solid%20#ccc;%0A%09padding:%2010px;%0A%7D"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  
+  <hgroup class="auto-fadein">
+    <h1>Fiji earthquake sample explorer</h1>
+    <h2>An interactive Shiny teaching application</h2>
+    <p>Igor Grybek — AI-assisted draft<br/></p>
+  </hgroup>
+  
+  <article></article>  
+  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  
+  <article data-timings="">
+    <h2 id="explore-a-historical-sample-without-writing-code">Explore a historical sample without writing code</h2>
+<ul>
+<li>A table of 1,000 events is difficult to explore quickly.</li>
+<li>Filter magnitude and depth, then inspect the remaining observations.</li>
+<li>This application makes its calculations and limitations visible.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+  
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  
+  <article data-timings="">
+    <h2 id="simple-controls-reactive-results">Simple controls, reactive results</h2>
+<ul>
+<li>Set minimum magnitude and maximum depth with the sliders.</li>
+<li>Change the histogram bin count to inspect the depth distribution.</li>
+<li><code>server.R</code> filters the data and calculates the event count, median magnitude and mean depth.</li>
+<li>The summary, histogram and first 15 table rows update together.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+  
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  
+  <article data-timings="">
+    <h2 id="a-reproducible-r-calculation">A reproducible R calculation</h2>
+<pre><code class="language-r">d &lt;- subset(datasets::quakes, mag &gt;= 5 &amp; depth &lt;= 300)
+data.frame(events=nrow(d), median_magnitude=median(d$mag),
+           mean_depth_km=round(mean(d$depth),1))
+</code></pre>
+<pre><code>##   events median_magnitude mean_depth_km
+## 1    127              5.2         110.2
+</code></pre>
+<p>The app uses the same filtering rule with values supplied by the sliders.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+  
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  
+  <article data-timings="">
+    <h2 id="try-it-and-interpret-responsibly">Try it and interpret responsibly</h2>
+<ul>
+<li>Start at magnitude 4.0 and depth 680 km to show all 1,000 records.</li>
+<li>Raise the magnitude threshold and compare the summary and histogram.</li>
+<li>Instructions and data documentation are included on the app.</li>
+<li>Historical teaching data; no live monitoring or earthquake forecast.</li>
+<li><a href="https://github.com/IgorGryb/python-training/tree/gh-pages/data-products/Shiny">Source code</a></li>
+<li>Source: R <code>datasets::quakes</code>, Harvard PRIM-H / John Woodhouse.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+  
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='NA'>
+         1
+      </a>
+    </li>
+    
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='NA'>
+         2
+      </a>
+    </li>
+    
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='NA'>
+         3
+      </a>
+    </li>
+    
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='NA'>
+         4
+      </a>
+    </li>
+    
+    </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="https://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
