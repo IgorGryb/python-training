@@ -1,0 +1,26 @@
+---
+title: "Depth beneath the pattern"
+date: "2026-10-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+data(quakes)
+stopifnot(nrow(quakes)==1000)
+rows <- apply(quakes,1,function(x) paste0("[",paste(x,collapse=","),"]"))
+json <- paste0("[",paste(rows,collapse=","),"]")
+write.csv(quakes,"quakes.csv",row.names=FALSE)
+```
+
+<main class="deck">
+<section class="slide"><p class="eyebrow">DEVELOPING DATA PRODUCTS · 15 OCTOBER 2026</p><h1>Depth beneath the pattern</h1><p class="lead">An interactive look at 1,000 historical earthquakes near Fiji.</p><p>Use Next or the arrow keys. On the chart, hover for details, drag to zoom and double-click to reset.</p></section>
+<section class="slide" hidden><h2>One dataset, two questions</h2><p>How do depth and magnitude vary together? Where do reporting-station counts differ?</p><p>Each dot is one event. The x-axis is depth in kilometres; the y-axis is magnitude. Colour indicates the number of reporting stations.</p><p>R's built-in quakes dataset has 1,000 records. The data are historical and do not describe current earthquake conditions.</p></section>
+<section class="slide" hidden><h2>Explore depth and magnitude</h2><div id="chart" style="height:450px"></div><p>Hover for exact values. Drag to zoom; use the toolbar to reset or export an image.</p></section>
+<section class="slide" hidden><h2>Interpret cautiously</h2><p>Depth and magnitude describe different properties. A visual association does not identify a physical cause or predict future events.</p><p>Station counts reflect reporting, not a population exposed to danger. The dataset is a selected historical sample.</p><p>Source: <a href="https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html">R quakes documentation</a> (Harvard PRIM-H / John Woodhouse). Generated from executed R Markdown using Plotly.js. Created 15 October 2026. AI-assisted draft.</p></section>
+<nav><button id="prev" disabled>Previous</button> <span id="position">1 / 4</span> <button id="next">Next</button></nav></main>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+```{r plot, results='asis'}
+cat('<script>const events=',json,';Plotly.newPlot("chart",[{x:events.map(e=>e[2]),y:events.map(e=>e[3]),text:events.map(e=>"Stations: "+e[4]+"; latitude: "+e[0]+"; longitude: "+e[1]),mode:"markers",type:"scatter",marker:{size:6,opacity:.65,color:events.map(e=>e[4]),colorscale:"Viridis",colorbar:{title:"Stations"}},hovertemplate:"Depth %{x} km<br>Magnitude %{y}<br>%{text}<extra></extra>"}],{xaxis:{title:"Depth (km)"},yaxis:{title:"Magnitude"},margin:{t:25},paper_bgcolor:"#f7fafb",plot_bgcolor:"#f7fafb"},{responsive:true});let current=0;const slides=[...document.querySelectorAll(".slide")];function show(n){current=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.hidden=i!==current);document.getElementById("position").textContent=(current+1)+" / "+slides.length;document.getElementById("prev").disabled=current===0;document.getElementById("next").disabled=current===slides.length-1;if(current===2)Plotly.Plots.resize("chart");}document.getElementById("prev").onclick=()=>show(current-1);document.getElementById("next").onclick=()=>show(current+1);document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")show(current+1);if(e.key==="ArrowLeft")show(current-1);});</script>',sep='')
+```
