@@ -1,0 +1,29 @@
+---
+title: "Fiji earthquake explorer"
+date: "2026-10-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+data(quakes)
+stopifnot(nrow(quakes)==1000)
+rows <- apply(quakes,1,function(x) paste0("[",paste(x,collapse=","),"]"))
+json <- paste0("[",paste(rows,collapse=","),"]")
+write.csv(quakes,"quakes.csv",row.names=FALSE)
+```
+
+<h1>Fiji earthquake explorer</h1>
+<p class="eyebrow">DEVELOPING DATA PRODUCTS · CREATED 15 OCTOBER 2026</p>
+<p>Explore 1,000 historical seismic events in R's <code>quakes</code> dataset. Pan and zoom; click a circle for magnitude, depth and reporting stations. These are historical teaching data, not a live feed or a risk forecast.</p>
+<label for="mag">Minimum magnitude: <strong id="threshold">4.0</strong></label>
+<input id="mag" type="range" min="4" max="6.4" step="0.1" value="4"/>
+<p id="count" aria-live="polite"></p><div id="map" style="height:520px"></div>
+<p><span style="color:#156e86">● Depth under 300 km</span> · <span style="color:#b34a35">● Depth 300 km or more</span>. Circle radius increases with magnitude; it is not the physical area affected.</p>
+<p>Source: <a href="https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html">R datasets documentation</a>, Harvard PRIM-H / John Woodhouse. Basemap © OpenStreetMap contributors. Built from executed R Markdown and Leaflet 1.9.4. AI-assisted draft.</p>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+```{r map, results='asis'}
+cat('<script>const events=',json,';const map=L.map("map").setView([-20,180],4);L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);const layer=L.layerGroup().addTo(map);function redraw(){const min=Number(document.getElementById("mag").value);layer.clearLayers();const shown=events.filter(e=>e[3]>=min);shown.forEach(e=>L.circleMarker([e[0],e[1]],{radius:3+(e[3]-4)*3,color:e[2]<300?"#156e86":"#b34a35",weight:1,fillOpacity:.55}).bindPopup("Magnitude "+e[3]+"<br>Depth: "+e[2]+" km<br>Reporting stations: "+e[4]).addTo(layer));document.getElementById("threshold").textContent=min.toFixed(1);document.getElementById("count").textContent=shown.length+" of 1000 events shown";}document.getElementById("mag").addEventListener("input",redraw);redraw();</script>',sep='')
+```
