@@ -52,5 +52,5 @@ The app uses the same filtering rule with values supplied by the sliders.
 - Raise the magnitude threshold and compare the summary and histogram.
 - Instructions and data documentation are included on the app.
 - Historical teaching data; no live monitoring or earthquake forecast.
-- [Source code](https://github.com/IgorGryb/python-training/tree/gh-pages/data-products/Shiny)
+- [Open the app](https://igorgryb.shinyapps.io/fiji-earthquake-explorer/) · [Source code](https://github.com/IgorGryb/python-training/tree/gh-pages/data-products/Shiny)
 - Source: R `datasets::quakes`, Harvard PRIM-H / John Woodhouse.
