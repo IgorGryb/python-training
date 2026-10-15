@@ -1,0 +1,35 @@
+Fiji earthquake sample explorer
+========================================================
+author: Igor Grybek — AI-assisted draft
+date: 15 October 2026
+
+Explore a historical dataset without writing code.
+
+The user problem
+========================================================
+- A table of 1,000 events is hard to explore quickly.
+- Users want to restrict magnitude and depth, then see what remains.
+- This teaching application makes the filters and calculations explicit.
+
+Simple controls, reactive results
+========================================================
+- Set minimum magnitude and maximum depth.
+- Select the histogram bin count.
+- server.R filters the data and calculates the count, median magnitude and mean depth.
+- Results, histogram and data preview update immediately.
+
+A reproducible calculation
+========================================================
+```{r example, echo=TRUE}
+d <- subset(datasets::quakes, mag >= 5 & depth <= 300)
+data.frame(events=nrow(d),median_magnitude=median(d$mag),mean_depth_km=round(mean(d$depth),1))
+```
+The deployed application uses the same filtering rule with slider inputs.
+
+Try it and interpret responsibly
+========================================================
+- Begin with magnitude 4.0 and depth 680 km to show all records.
+- Increase the magnitude threshold and compare the count and histogram.
+- The documentation is included on the application itself.
+- Historical teaching sample; no live monitoring or forecast.
+- Source: R datasets::quakes, Harvard PRIM-H / John Woodhouse.
